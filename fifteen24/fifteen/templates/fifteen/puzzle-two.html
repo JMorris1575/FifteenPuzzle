@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block head %}
+
+<style>
+    #puzzle-frame {
+        border: 10px solid black;
+        border-radius: 10px;
+        background: #404040;
+        padding: 0;
+        width: 320px;
+        height: 320px;
+    }
+</style>
+
+<script>
+
+    $(function() {
+        const canvas = $("#puzzle-frame")[0];
+        const ctx = canvas.getContext('2d');
+        const colors = [ ["Crimson", "Red", "DarkRed"], ["Ivory", "White", "AntiqueWhite"] ];
+
+        var puzzle_array = [];
+        var blank;
+        var tiles_on_a_side = 4;
+        var moving_tiles = [];
+        var solution = [1, 2, 3, 4, 12, 13, 14, 5, 11, null, 15, 6, 10, 9, 8, 7]
+
+        class Tile{
+            constructor(x, y, size, number, row, col, dir) {
+                if (dir === undefined) { this.dir = null; }
+                this.row = row;
+                this.col = col;
+                this.size = size;
+                this.x = this.size * col;
+                this.y = this.size * row;
+                this.half_size = size / 2;
+                if (number) {
+                    this.number = number;
+                    this.type = number % 2;  // 0 for even, 1 for odd tiles
+                } else {
+                    this.number = null;
+                    this.type = -1;          // -1 for pictures
+                }
+                this.row = row;
+                this.col = col;
+                this.dir = dir;
+            }
+            draw() {
+                if (this.number) {
+                    var palette = colors[this.type];
+                    ctx.fillStyle = palette[0];
+                    ctx.fillRect(this.x, this.y, this.size, this.size);
+                    for (var i=0; i<5; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(this.x + i, this.y + this.size - i);
+                        ctx.lineTo(this.x + i, this.y + i);
+                        ctx.lineTo(this.x + this.size - i, this.y + i);
+                        ctx.strokeStyle = 'Gray'; //palette[1];
+                        ctx.globalAlpha = 1 / (i + 0.5);
+                        ctx.stroke()
+                    }
+                    for (i=0; i<5; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(this.x + i, this.y + this.size - i);
+                        ctx.lineTo(this.x + this.size - i, this.y + this.size - i);
+                        ctx.lineTo(this.x + this.size - i, this.y + i);
+                        ctx.strokeStyle = 'Black'; //palette[2];
+                        ctx.globalAlpha = 1 - 0.15 * i;
+                        ctx.stroke()
+                    }
+                    ctx.globalAlpha = 1;
+                    ctx.font = this.size * 0.6 + 'px arial';
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'center';
+                    var offsetX = this.x + this.size / 2;
+                    var offsetY = this.y + this.size / 2;
+                    ctx.fillStyle = 'GoldenRod';
+                    ctx.fillText(this.number.toString(), offsetX, offsetY);
+                    ctx.strokeStyle = "Grey";
+                    ctx.strokeText(this.number.toString(), offsetX, offsetY);
+                }
+            }
+            set_motion() {
+                if (this.row == blank.row) {
+                    if (this.col < blank.col) {
+                        this.dir = 'right';
+                    } else {
+                        this.dir = 'left';
+                    }
+                } else {
+                    if (this.col == blank.col) {
+                        if (this.row < blank.row) {
+                            this.dir = 'down';
+                        } else {
+                            this.dir = 'up';
+                        }
+                    } else {
+                        this.dir = null;
+                    }
+                }
+            } // end of set_motion
+            move() {
+                this.x = this.size * this.col;
+                this.y = this.size * this.row;
+            }
+        } // end of Tile definition
+
+        class Blank {
+            constructor(row, col) {
+                this.row = row;
+                this.col = col;
+            }
+        } // end of Blank definition
+
+        function createPuzzle(puzzle_height) {
+            size = puzzle_height / tiles_on_a_side;
+            puzzle_array = [];
+            var tile_num = 1;
+            for (row=0; row<tiles_on_a_side; row++) {
+                for (col=0; col<tiles_on_a_side; col++) {
+                    if ( ! ( row == tiles_on_a_side - 1 && col == tiles_on_a_side - 1 ) ) {
+                        var x = size * col;
+                        var y = size * row;
+                        puzzle_array.push(new Tile(x, y, size, tile_num, row, col));
+                        tile_num++;
+                    }
+                }
+            }
+            blank = new Blank(tiles_on_a_side - 1, tiles_on_a_side - 1);
+            updateMotions()
+        }
+
+        function updateMotions() {
+            for (var i=0; i<puzzle_array.length; i++) {
+                puzzle_array[i].set_motion();
+            }
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawPuzzle() {
+            clearCanvas();
+            puzzle_array.forEach(tile => {
+                tile.draw()
+            }); // end of forEach
+        }
+
+        function get_index(row, col) {
+            // gets the index for the tile at row, col
+            // returns null if there is no tile there
+            for (let i=0; i<puzzle_array.length; i++) {
+                tile = puzzle_array[i];
+                if (tile.row == row && tile.col == col) {
+                    return i;
+                }
+            } // end of for
+            return null;
+        }
+
+        function solved() {
+            // compares the values in the solution array to the positions
+            // of the puzzle tiles according to their rows and columns
+            var ptr = 0;
+            for(let row=0; row<tiles_on_a_side; row++) {
+                for(let col=0; col<tiles_on_a_side; col++) {
+                    index = get_index(row, col);
+                    if (index == null) {
+                        value = null;
+                    } else {
+                        value = puzzle_array[index].number;
+                    }
+                    if (value == solution[ptr]) {
+                        ptr++
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        createPuzzle(canvas.height);
+        drawPuzzle();
+
+        $('#puzzle-frame').click( function(event) {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = event.clientX - rect.left - 10; // mouse position adjusted for border width
+            mouseY = event.clientY - rect.top - 10;
+            size = puzzle_array[0].size;
+            if (mouseX >= 0 && mouseX < canvas.width && mouseY >= 0 && mouseY < canvas.height) {
+                var col = Math.floor(mouseX / size);
+                var row = Math.floor(mouseY / size);
+                clicked_index = get_index(row, col);
+                if (clicked_index != null) {
+                    if (clicked_index < puzzle_array.length) {
+                        clicked_tile = puzzle_array[clicked_index]
+                        if (clicked_tile.dir != null) {
+                            var moving = set_tile_motion(clicked_index);
+                        } // end of dir != null
+                    } // end of index in bounds check
+                } // end of clicked_index exists
+            } // end of mouse on puzzle check
+        }); // end of canvas click event listener
+
+        function set_tile_motion(clicked_index) {
+            var clicked_tile = puzzle_array[clicked_index];
+            var clicked_row = clicked_tile.row
+            var clicked_col = clicked_tile.col
+            moving_tiles = [];
+            moving_tiles.push(clicked_index);               // you are certainly going to move the clicked tile
+            dir = clicked_tile.dir
+            if (dir == 'left') {
+                ptr = clicked_tile.col - 1;                 // point to the column to the left
+                while (ptr != blank.col) {                     // it's not the blank, add the tile to the array
+                    moving_tiles.push(get_index(clicked_tile.row, ptr));
+                    ptr--;
+                } // end of while
+                var index;
+                moving_tiles.forEach( index => {
+                    current_tile = puzzle_array[index];
+                    current_tile.col--;
+                    current_tile.move();
+                }); // end of forEach
+            } // end of dir == 'left
+            if (dir == 'right') {
+                ptr = clicked_tile.col + 1;                 // point to the column to the right
+                while (ptr != blank.col) {                     // it's not the blank, add the tile to the array
+                    moving_tiles.push(get_index(clicked_tile.row,  ptr));
+                    ptr++;
+                } // end of while
+                var index;
+                moving_tiles.forEach( index => {
+                    current_tile = puzzle_array[index];
+                    current_tile.col++;
+                    current_tile.move();
+                }); // end of forEach
+            } // end of dir == 'right'
+            if (dir == 'up') {
+                ptr = clicked_tile.row - 1;                    // point to the row above
+                while (ptr != blank.row) {                     // it's not the blank, add the tile to the array
+                    moving_tiles.push(get_index(ptr, clicked_tile.col));
+                    ptr--;
+                } // end of while
+                var index;
+                moving_tiles.forEach( index => {
+                    current_tile = puzzle_array[index];
+                    current_tile.row--;
+                    current_tile.move();
+                }); // end of forEach
+            } // end of dir == 'up'
+            if (dir == 'down') {
+                ptr = clicked_tile.row + 1;                     // point to the row below
+                while (ptr != blank.row) {                      // it's not the blank, add the tile to the array
+                    moving_tiles.push(get_index(ptr, clicked_tile.col));
+                    ptr++;                                        // point to the next row
+                } // end of while
+                var index;
+                moving_tiles.forEach( index => {
+                    current_tile = puzzle_array[index];
+                    current_tile.row++;
+                    current_tile.move();
+                }); // end of forEach
+            } // end of dir == 'down'
+            blank.row = clicked_row;
+            blank.col = clicked_col;
+            drawPuzzle();
+            updateMotions();
+            var result = solved();
+            if (result == true){
+                console.log('The puzzle is solved!');
+            }
+        } // end of get_moving_tiles function
+
+    }); // end ready
+
+</script>
+
+{% endblock %}
+
+{% block title %}Fifteen Puzzle{% endblock %}
+
+{% block content %}
+
+    <div class="card col-md-10 my-3 mx-md-auto">
+        <div class="card-header text-center card-header-text">
+            <h3>Practice Space for Puzzle Development.</h3>
+        </div>
+        <div class="card-body row justify-content-center">
+            <canvas id="puzzle-frame" width="300px" height="300px" class="col-lg-4">
+            </canvas>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+    <div class="card col-md-8 my-3 mx-md-auto">
+        <div class="card-header text-center card-header-text">
+            <h3>Login Here:</h3>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">
+                Enter your Username and Password here. Both are case-sensitive.
+            </h5>
+
+            {% if form.errors %}
+                <p>
+                    Sorry, I'm pretty finicky about usernames and passwords. They are both case-sensitive and have to exactly
+                    match what is in my database. Please try again, or contact Jim if you can't get it to work.
+                </p>
+            {% endif %}
+
+            {% if next %}
+                {% if user.is_authenticated %}
+                    <p class="text-danger">Sorry, you need special permission to see that page. To proceed,
+                        log in to an account with that permission.</p>
+                {% else %}
+                    <p class="text-danger">You need to log in to see that page.</p>
+                {% endif %}
+            {% endif %}
+
+            <form method="post" action="{% url 'user:login' %}">
+                {% csrf_token %}
+                <div class="input-group input-group-lg my-3 px-3">
+                    <span class="input-group-text card-header-text">
+                        <i class="fas fa-user"></i>
+                    </span>
+                    <input type="text" name="username" autocomplete="off" id="username_input" required
+                           class="form-control" placeholder="Username" autofocus>
+                </div>
+                <div class="input-group input-group-lg my-3 px-3">
+                    <span class="input-group-text card-header-text">
+                        <i class="fas fa-key"></i>
+                    </span>
+                    <input type="password" name="password" id="password_input" required
+                           class="form-control" placeholder="Password">
+                </div>
+                <div class="row justify-content-center input-group input-group-lg my-3 px-3 col-6">
+                    <button type="submit" class="col-6 btn btn-lg fp-btn-solid"
+                           id="login_button">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        Login
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <hr>
+    <p>
+        <span>form.errors:  {{ form.errors }}</span>
+    </p>
+    <p>
+        <span>next: </span><span>{{ next }}</span>
+    </p>
+    <p>
+        <span>site: </span><span>{{ site }}</span>
+    </p>
+    <p>
+        <span>site_name: </span><span>{{ site_name }}</span>
+    </p>
+    <p>
+        <span>request.path_info: </span><span>{{ request.path_info }}</span>
+    </p>
+{% endblock %}

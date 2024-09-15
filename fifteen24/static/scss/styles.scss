@@ -1,0 +1,49 @@
+// SCSS Variables
+
+$color-background: #342dec;
+$color-background-dark: #1d18a1;
+$color-foreground: #ffdd55;
+$color-header-link: rgba(255, 221, 85, 0.8) !important;
+$color-header-link-hover: rgba(255, 221, 85, 1.0) !important;
+
+// Rules
+
+header, footer {
+    background: $color-background;
+    color: $color-foreground;
+}
+
+header a {
+    color: $color-header-link;
+    text-decoration: none;
+}
+
+header a:hover {
+    color: $color-header-link-hover;
+    text-decoration: none;
+}
+
+.header-text {
+    font-family: 'Caveat', cursive;
+    font-size: 4rem;
+}
+
+.card-header-text {
+    font-family: 'Lato', sans-serif;
+    background: $color-background;
+    color: $color-foreground;
+}
+
+.fp-btn-solid {
+    background: $color-background;
+    color: $color-foreground;
+}
+
+.fp-btn-solid:hover {
+    background: $color-background-dark;
+    color: $color-foreground;
+}
+
+.card {
+    border: 2px solid $color-background;
+}

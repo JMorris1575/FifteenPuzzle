@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block head %}
+
+<style>
+    #puzzle-frame {
+        border: 10px solid black;
+        border-radius: 10px;
+        background: #404040;
+        padding: 0;
+        width: 320px;
+        height: 320px;
+    }
+
+    #solution-picture {
+        width: 300px;
+        height: 300px;
+        position: absolute;
+    }
+
+</style>
+
+<script src="{% static 'fifteen/scripts/' %}fifteen.js"></script>
+
+{% endblock %}
+
+{% block title %}Fifteen Puzzle{% endblock %}
+
+{% block content %}
+
+    <div class="card col-md-10 my-3 mx-md-auto">
+        <div class="card-header text-center card-header-text">
+            <h3>Practice Space for Puzzle Development.</h3>
+        </div>
+        <div class="card-body row justify-content-center">
+            <canvas id="puzzle-frame" width="300px" height="300px" class="col-lg-4"></canvas>
+            <div class="row justify-content-center gap-3 my-3">
+                <button class="col-1 btn btn-lg fp-btn-solid">2 x 2</button>
+                <button class="col-1 btn btn-lg fp-btn-solid">3 x 3</button>
+                <button class="col-1 btn btn-lg fp-btn-solid">4 x 4</button>
+                <button class="col-1 btn btn-lg fp-btn-solid">5 x 5</button>
+            </div>
+            <img id="solution-picture" class="px-0 d-none">
+        </div>
+    </div>
+
+    <script>
+        // sounds
+        const one_tile = new Audio("{% static 'fifteen/audio/one_tile_click.mp3' %}");
+        const puzzle_solve = new Audio("{% static 'fifteen/audio/puzzle_solve.wav' %}");
+
+<!--        //image-->
+<!--        pic_url = "{% static 'fifteen/images/jim_puzzle.png' %}";-->
+
+    </script>
+
+{% endblock %}
