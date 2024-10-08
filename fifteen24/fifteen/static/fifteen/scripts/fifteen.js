@@ -22,23 +22,23 @@ $(function() {
         ); // end of get
     }; // end of get_puzzle
 
-//    var puzzle_map = {
-//        side_tiles: 4,
-//        start_positions: [15, 6, 10, 0, 2, 4, 8, 12, 14, 5, 11, 9, 13, 3, 7, 1],
-//        solution: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0],
-//        style: 'pic'
-//    }
+    var puzzle_map = {
+        side_tiles: 4,
+        start_positions: [15, 6, 10, 0, 2, 4, 8, 12, 14, 5, 11, 9, 13, 3, 7, 1],
+        solution: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0],
+        style: 'pic'
+    }
 
-//    var current_pic = new Image();
-//    current_pic.src = pic_url;
-//    current_pic.onload = function() {
-//        let pic = $('#solution-picture');
-//        pic[0].style.left = (canvas.offsetLeft + 10) + 'px';
-//        pic[0].style.top = (canvas.offsetTop + 10) + 'px';
-//        puzzle = new Puzzle(puzzle_map);
-//        puzzle.draw();
-//        pic.fadeOut(10000);
-//    }; // end of current_pic.onload
+    var current_pic = new Image();
+    current_pic.src = pic_url;
+    current_pic.onload = function() {
+        let pic = $('#solution-picture');
+        pic[0].style.left = (canvas.offsetLeft + 10) + 'px';
+        pic[0].style.top = (canvas.offsetTop + 10) + 'px';
+        puzzle = new Puzzle(puzzle_map);
+        puzzle.draw();
+        pic.fadeOut(10000);
+    }; // end of current_pic.onload
 
     class Tile{
         constructor(number, type, image) {
